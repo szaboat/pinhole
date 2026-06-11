@@ -5,6 +5,8 @@ rectangle you select. The clear area remains fully interactive, so mouse,
 trackpad, scrolling, and keyboard input continue to work in the application
 underneath it.
 
+![FocusC demo](demo.webp)
+
 ## Run
 
 Requirements: macOS 12 or newer and Xcode 14 or newer.
