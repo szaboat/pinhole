@@ -25,3 +25,7 @@ open dist/FocusC.app
 
 The build script creates a universal application for both Apple Silicon and
 Intel Macs and ad-hoc signs it for local use.
+
+## License
+
+FocusC is available under the [MIT License](LICENSE).
