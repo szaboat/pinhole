@@ -5,10 +5,12 @@ final class SelectionController {
     var onCancel: (() -> Void)?
 
     private var windows: [SelectionWindow] = []
+    private var selectableWindows: [SelectableWindow] = []
     private var isFinishing = false
 
     func begin() {
         NSApp.activate(ignoringOtherApps: true)
+        selectableWindows = SelectableWindow.visibleWindows()
 
         windows = NSScreen.screens.map { screen in
             let window = SelectionWindow(screen: screen)
@@ -19,6 +21,16 @@ final class SelectionController {
                     dy: window.frame.minY
                 )
                 self.finish(with: globalRect)
+            }
+            window.selectionView.onWindowSelection = { [weak self, weak window] localPoint in
+                guard let self, let window else { return false }
+                let globalPoint = NSPoint(
+                    x: localPoint.x + window.frame.minX,
+                    y: localPoint.y + window.frame.minY
+                )
+                guard let selectedWindow = self.window(at: globalPoint) else { return false }
+                self.finish(with: selectedWindow.frame)
+                return true
             }
             window.selectionView.onCancel = { [weak self] in
                 self?.cancel()
@@ -57,6 +69,11 @@ final class SelectionController {
     private func closeWindows() {
         windows.forEach { $0.close() }
         windows.removeAll()
+        selectableWindows.removeAll()
+    }
+
+    private func window(at point: NSPoint) -> SelectableWindow? {
+        selectableWindows.first { $0.frame.contains(point) }
     }
 }
 
@@ -85,11 +102,13 @@ final class SelectionWindow: NSWindow {
 
 final class SelectionView: NSView {
     var onSelection: ((NSRect) -> Void)?
+    var onWindowSelection: ((NSPoint) -> Bool)?
     var onCancel: (() -> Void)?
 
     private var dragStart: NSPoint?
     private var selectionRect = NSRect.zero
     private let minimumSelectionSize: CGFloat = 24
+    private let clickSelectionTolerance: CGFloat = 4
 
     override var acceptsFirstResponder: Bool { true }
 
@@ -132,10 +151,18 @@ final class SelectionView: NSView {
     override func mouseUp(with event: NSEvent) {
         guard dragStart != nil else { return }
         mouseDragged(with: event)
+        let clickPoint = dragStart
         dragStart = nil
 
         guard selectionRect.width >= minimumSelectionSize,
               selectionRect.height >= minimumSelectionSize else {
+            if selectionRect.width <= clickSelectionTolerance,
+               selectionRect.height <= clickSelectionTolerance,
+               let clickPoint,
+               onWindowSelection?(clickPoint) == true {
+                return
+            }
+
             selectionRect = .zero
             needsDisplay = true
             return
@@ -162,7 +189,7 @@ final class SelectionView: NSView {
     }
 
     private func drawInstructions() {
-        let title = "Drag to select your focus area"
+        let title = "Click a window or drag a focus area"
         let subtitle = "Press Escape to cancel"
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .center
@@ -221,5 +248,77 @@ final class SelectionView: NSView {
             ),
             withAttributes: attributes
         )
+    }
+}
+
+private struct SelectableWindow {
+    let frame: NSRect
+
+    static func visibleWindows() -> [SelectableWindow] {
+        guard let windowInfo = CGWindowListCopyWindowInfo(
+            [.optionOnScreenOnly, .excludeDesktopElements],
+            kCGNullWindowID
+        ) as? [[String: Any]] else {
+            return []
+        }
+
+        let currentProcessID = Int(ProcessInfo.processInfo.processIdentifier)
+
+        return windowInfo.compactMap { info in
+            guard let ownerPID = info[kCGWindowOwnerPID as String] as? Int,
+                  ownerPID != currentProcessID,
+                  let layer = info[kCGWindowLayer as String] as? Int,
+                  layer == 0,
+                  let alpha = info[kCGWindowAlpha as String] as? Double,
+                  alpha > 0,
+                  let bounds = info[kCGWindowBounds as String] as? [String: Any],
+                  let frame = NSRect(cgWindowBounds: bounds),
+                  frame.width >= 24,
+                  frame.height >= 24 else {
+                return nil
+            }
+
+            return SelectableWindow(frame: frame.integral)
+        }
+    }
+}
+
+private extension NSRect {
+    init?(cgWindowBounds bounds: [String: Any]) {
+        guard let x = bounds["X"] as? CGFloat,
+              let y = bounds["Y"] as? CGFloat,
+              let width = bounds["Width"] as? CGFloat,
+              let height = bounds["Height"] as? CGFloat,
+              width > 0,
+              height > 0 else {
+            return nil
+        }
+
+        let cgRect = NSRect(x: x, y: y, width: width, height: height)
+        guard let screen = NSScreen.screens.first(where: { screen in
+            guard let displayBounds = screen.displayBounds else { return false }
+            return displayBounds.intersects(cgRect)
+        }) else {
+            return nil
+        }
+
+        guard let displayBounds = screen.displayBounds else { return nil }
+        self.init(
+            x: screen.frame.minX + (cgRect.minX - displayBounds.minX),
+            y: screen.frame.maxY - (cgRect.maxY - displayBounds.minY),
+            width: cgRect.width,
+            height: cgRect.height
+        )
+    }
+}
+
+private extension NSScreen {
+    var displayBounds: NSRect? {
+        guard let displayID = deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")]
+            as? CGDirectDisplayID else {
+            return nil
+        }
+
+        return NSRectFromCGRect(CGDisplayBounds(displayID))
     }
 }

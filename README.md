@@ -15,8 +15,9 @@ Requirements: macOS 12 or newer and Xcode 14 or newer.
 swift run FocusC
 ```
 
-Drag to select the area to keep visible. Use **Close Focus** or the menu-bar
-item to remove the overlay. Choose **Select Focus Area...** to draw a new one.
+Click a window to keep that window visible, or drag to select a custom area.
+Use **Close Focus** or the menu-bar item to remove the overlay. Choose
+**Select Window or Focus Area...** to draw a new one.
 
 ## Build an application bundle
 

@@ -56,7 +56,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let menu = NSMenu()
         menu.addItem(
-            withTitle: "Select Focus Area...",
+            withTitle: "Select Window or Focus Area...",
             action: #selector(beginSelection),
             keyEquivalent: ""
         )
