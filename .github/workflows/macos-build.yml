@@ -1,0 +1,28 @@
+name: macOS Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build universal app
+        run: ./scripts/build-app.sh
+
+      - name: Package app
+        run: ditto -c -k --keepParent dist/FocusC.app FocusC-macOS.zip
+
+      - name: Upload app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FocusC-macOS
+          path: FocusC-macOS.zip
+
