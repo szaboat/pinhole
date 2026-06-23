@@ -2,8 +2,8 @@ name: macOS Build
 
 on:
   push:
-    branches: [main]
-  pull_request:
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -25,4 +25,3 @@ jobs:
         with:
           name: FocusC-macOS
           path: FocusC-macOS.zip
-
