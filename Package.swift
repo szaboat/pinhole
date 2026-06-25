@@ -3,17 +3,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "FocusC",
+    name: "Pinhole",
     platforms: [
         .macOS(.v12)
     ],
     products: [
-        .executable(name: "FocusC", targets: ["FocusC"])
+        .executable(name: "Pinhole", targets: ["Pinhole"])
     ],
     targets: [
         .executableTarget(
-            name: "FocusC",
-            path: "Sources/FocusC"
+            name: "Pinhole",
+            path: "Sources/Pinhole"
         )
     ]
 )

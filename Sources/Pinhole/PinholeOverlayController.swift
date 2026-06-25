@@ -1,6 +1,6 @@
 import AppKit
 
-final class FocusOverlayController {
+final class PinholeOverlayController {
     private var dimmingWindows: [NSWindow] = []
     private var borderWindow: NSWindow?
     private var closeWindow: NSWindow?

@@ -189,7 +189,7 @@ final class SelectionView: NSView {
     }
 
     private func drawInstructions() {
-        let title = "Click a window or drag a focus area"
+        let title = "Click a window or drag a pinhole"
         let subtitle = "Press Escape to cancel"
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .center

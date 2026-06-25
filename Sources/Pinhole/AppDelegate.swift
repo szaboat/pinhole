@@ -6,7 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         static let backgroundTransparency = "backgroundTransparency"
     }
 
-    private let overlayController = FocusOverlayController()
+    private let overlayController = PinholeOverlayController()
     private var selectionController: SelectionController?
     private var statusItem: NSStatusItem?
     private var preferencesMenuView: PreferencesMenuView?
@@ -51,12 +51,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.image = NSImage(
             systemSymbolName: "viewfinder",
-            accessibilityDescription: "FocusC"
+            accessibilityDescription: "Pinhole"
         )
 
         let menu = NSMenu()
         menu.addItem(
-            withTitle: "Select Window or Focus Area...",
+            withTitle: "Select Window or Pinhole...",
             action: #selector(beginSelection),
             keyEquivalent: ""
         )
@@ -69,7 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(makePreferencesMenuItem())
         menu.addItem(.separator())
         menu.addItem(
-            withTitle: "Quit FocusC",
+            withTitle: "Quit Pinhole",
             action: #selector(quit),
             keyEquivalent: ""
         )
