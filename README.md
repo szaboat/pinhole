@@ -5,6 +5,10 @@ rectangle you select. The clear area stays fully interactive, so mouse,
 trackpad, scrolling, and keyboard input continue to work in the application
 underneath it.
 
+[Download the latest release](https://github.com/szaboat/pinhole/releases/latest)
+for macOS 12 or newer. The app is not notarized, so macOS may warn before
+opening it.
+
 ![Pinhole demo](demo.webp)
 
 ## Run
